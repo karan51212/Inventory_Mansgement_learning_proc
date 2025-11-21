@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Low Stock Products - Product Inventory Management</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-exclamation-triangle"></i> Low Stock Products</h2>
+        <a href="/products" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Products</a>
+    </div>
+
+    <div class="card"><div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Min Qty</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td><a th:href="@{/products/{id}(id=${product.id})}" th:text="${product.name}"></a></td>
+                    <td><span class="badge bg-secondary" th:text="${product.sku}"></span></td>
+                    <td><span class="badge bg-info" th:text="${product.category != null ? product.category : 'Uncategorized'}"></span></td>
+                    <td th:text="${product.quantity}"></td>
+                    <td th:text="${product.minQuantity}"></td>
+                    <td><a th:href="@{/products/{id}/stock(id=${product.id})}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-slash-minus"></i> Manage Stock</a></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(products)}">
+                    <td colspan="6" class="text-center py-4 text-muted"><i class="bi bi-inbox display-4"></i><p class="mt-2">No low stock products</p></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div></div>
+</div>
+</body>
+</html>

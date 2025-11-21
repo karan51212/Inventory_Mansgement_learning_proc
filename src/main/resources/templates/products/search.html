@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Search Products - Product Inventory Management</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-search"></i> Search Products</h2>
+        <a href="/products" class="btn btn-outline-secondary"><i class="bi bi-list"></i> All Products</a>
+    </div>
+
+    <div class="card mb-4"><div class="card-body">
+        <form th:action="@{/products/search}" method="get" class="row g-3">
+            <div class="col-md-3"><input type="text" name="name" th:value="${searchName}" class="form-control" placeholder="Product name"></div>
+            <div class="col-md-3">
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    <option th:each="cat : ${categories}" th:value="${cat.name}" th:text="${cat.name}" th:selected="${searchCategory == cat.name}"></option>
+                </select>
+            </div>
+            <div class="col-md-2"><input type="text" name="brand" th:value="${searchBrand}" class="form-control" placeholder="Brand"></div>
+            <div class="col-md-2"><input type="number" name="minPrice" step="0.01" th:value="${searchMinPrice}" class="form-control" placeholder="Min price"></div>
+            <div class="col-md-2"><input type="number" name="maxPrice" step="0.01" th:value="${searchMaxPrice}" class="form-control" placeholder="Max price"></div>
+            <div class="col-md-2"><input type="number" name="minQuantity" th:value="${searchMinQuantity}" class="form-control" placeholder="Min qty"></div>
+            <div class="col-md-12 text-end"><button type="submit" class="btn btn-outline-primary"><i class="bi bi-search"></i> Search</button></div>
+        </form>
+    </div></div>
+
+    <div class="card"><div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th>Brand</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td><div class="product-image-placeholder"><i class="bi bi-image"></i></div></td>
+                    <td><strong th:text="${product.name}"></strong><br><small class="text-muted" th:text="${product.description}"></small></td>
+                    <td><span class="badge bg-secondary" th:text="${product.sku}"></span></td>
+                    <td><span class="badge bg-info" th:text="${product.category}"></span></td>
+                    <td th:text="${product.brand}"></td>
+                    <td><span class="text-success fw-bold" th:text="${'Rs.' + #numbers.formatDecimal(product.price, 1, 2)}"></span></td>
+                    <td>
+                        <span th:if="${product.quantity == 0}" class="badge bg-danger">Out of Stock</span>
+                        <span th:if="${product.quantity > 0 && product.minQuantity != null && product.quantity <= product.minQuantity}" class="badge bg-warning">Low Stock</span>
+                        <span th:if="${product.quantity > 0 && (product.minQuantity == null || product.quantity > product.minQuantity)}" class="badge bg-success">In Stock</span>
+                        <br>
+                        <small th:text="${product.quantity + ' ' + (product.unit != null ? product.unit : '')}"></small>
+                    </td>
+                    <td>
+                        <span th:if="${product.isActive}" class="badge bg-success">Active</span>
+                        <span th:unless="${product.isActive}" class="badge bg-secondary">Inactive</span>
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a th:href="@{/products/{id}(id=${product.id})}" class="btn btn-sm btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                            <a th:href="@{/products/{id}/edit(id=${product.id})}" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(products)}">
+                    <td colspan="9" class="text-center py-4 text-muted"><i class="bi bi-inbox display-4"></i><p class="mt-2">No products found</p></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <nav th:if="${totalPages > 1}" aria-label="Search pagination">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/products/search(page=${currentPage - 1}, size=10, name=${searchName}, category=${searchCategory}, brand=${searchBrand}, minPrice=${searchMinPrice}, maxPrice=${searchMaxPrice}, minQuantity=${searchMinQuantity})}"><i class="bi bi-chevron-left"></i></a>
+                </li>
+                <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${pageNum == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/products/search(page=${pageNum}, size=10, name=${searchName}, category=${searchCategory}, brand=${searchBrand}, minPrice=${searchMinPrice}, maxPrice=${searchMaxPrice}, minQuantity=${searchMinQuantity})}" th:text="${pageNum + 1}"></a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/products/search(page=${currentPage + 1}, size=10, name=${searchName}, category=${searchCategory}, brand=${searchBrand}, minPrice=${searchMinPrice}, maxPrice=${searchMaxPrice}, minQuantity=${searchMinQuantity})}"><i class="bi bi-chevron-right"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div></div>
+</div>
+</body>
+</html>

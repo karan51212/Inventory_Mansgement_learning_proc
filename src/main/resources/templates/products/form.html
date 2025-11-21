@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+
+<head>
+    <title th:text="${product.id != null ? 'Edit Product' : 'Add New Product'} + ' - Product Inventory Management'"></title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-box-seam"></i>
+                <span th:text="${product.id != null ? 'Edit Product' : 'Add New Product'}"></span>
+            </h2>
+            <a href="/products" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Products
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pencil-square"></i>
+                            Product Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="${product.id} == null ? @{/products} : @{/products/{id}(id=${product.id})}" th:object="${product}" method="post" class="needs-validation" novalidate>
+                            <input type="hidden" th:field="*{id}" />
+                            <input type="hidden" th:field="*{createdAt}" />
+                            <input type="hidden" th:field="*{updatedAt}" />
+                            
+                            <div class="row">
+                                <!-- Product Name -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="name" th:field="*{name}" 
+                                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" required>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" 
+                                         th:errors="*{name}"></div>
+                                </div>
+
+                                <!-- SKU -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="sku" class="form-label">SKU <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="sku" th:field="*{sku}" 
+                                           th:classappend="${#fields.hasErrors('sku')} ? 'is-invalid'" required>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('sku')}" 
+                                         th:errors="*{sku}"></div>
+                                    <small class="form-text text-muted">Stock Keeping Unit - unique identifier</small>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" th:field="*{description}" 
+                                          rows="3" th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" 
+                                     th:errors="*{description}"></div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Category (by name) -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="category" class="form-label">Category</label>
+                                    <select class="form-select" id="category" th:field="*{category}">
+                                        <option value="">Select Category</option>
+                                        <option th:each="cat : ${categories}" th:value="${cat.name}" th:text="${cat.name}" th:selected="${cat.name == product.category}"></option>
+                                    </select>
+                                </div>
+
+                                <!-- Brand -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="brand" class="form-label">Brand</label>
+                                    <input type="text" class="form-control" id="brand" th:field="*{brand}" 
+                                           th:classappend="${#fields.hasErrors('brand')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('brand')}" 
+                                         th:errors="*{brand}"></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Price -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="price" class="form-label">Price <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rs</span>
+                                        <input type="number" class="form-control" id="price" th:field="*{price}" 
+                                               step="0.01" min="0" th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'" required>
+                                    </div>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}" 
+                                         th:errors="*{price}"></div>
+                                </div>
+
+                                <!-- Quantity -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="quantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="quantity" th:field="*{quantity}" 
+                                           min="0" th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'" required>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}" 
+                                         th:errors="*{quantity}"></div>
+                                </div>
+
+                                <!-- Minimum Quantity -->
+                                <div class="col-md-4 mb-3">
+                                    <label for="minQuantity" class="form-label">Minimum Quantity</label>
+                                    <input type="number" class="form-control" id="minQuantity" th:field="*{minQuantity}" 
+                                           min="0" th:classappend="${#fields.hasErrors('minQuantity')} ? 'is-invalid'">
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('minQuantity')}" 
+                                         th:errors="*{minQuantity}"></div>
+                                    <small class="form-text text-muted">Low stock alert threshold</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- Unit -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="unit" class="form-label">Unit</label>
+                                    <select class="form-select" id="unit" th:field="*{unit}">
+                                        <option value="">Select Unit</option>
+                                        <option value="pieces">Pieces</option>
+                                        <option value="kg">Kilograms</option>
+                                        <option value="g">Grams</option>
+                                        <option value="l">Liters</option>
+                                        <option value="ml">Milliliters</option>
+                                        <option value="m">Meters</option>
+                                        <option value="cm">Centimeters</option>
+                                        <option value="boxes">Boxes</option>
+                                        <option value="pairs">Pairs</option>
+                                        <option value="sets">Sets</option>
+                                    </select>
+                                </div>
+
+                                <!-- Active Status -->
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Status</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="isActive" th:field="*{isActive}">
+                                        <label class="form-check-label" for="isActive">Active Product</label>
+                                    </div>
+                                    <small class="form-text text-muted">Inactive products won't appear in regular listings</small>
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i>
+                                    <span th:text="${product.id != null ? 'Update Product' : 'Create Product'}"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar with Help and Tips -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-info-circle"></i> Help & Tips</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6><i class="bi bi-lightbulb text-warning"></i> Product Naming</h6>
+                            <small class="text-muted">Use descriptive names that clearly identify the product.</small>
+                        </div>
+                        <div class="mb-3">
+                            <h6><i class="bi bi-tag text-info"></i> SKU Guidelines</h6>
+                            <small class="text-muted">SKU should be unique and follow a consistent pattern.</small>
+                        </div>
+                        <div class="mb-3">
+                            <h6><i class="bi bi-exclamation-triangle text-warning"></i> Stock Management</h6>
+                            <small class="text-muted">Set minimum quantity to receive alerts when stock is low.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/categories/new" class="btn btn-outline-primary btn-sm"><i class="bi bi-plus-circle"></i> Add New Category</a>
+                            <a href="/products" class="btn btn-outline-secondary btn-sm"><i class="bi bi-list"></i> View All Products</a>
+                            <a href="/dashboard" class="btn btn-outline-info btn-sm"><i class="bi bi-graph-up"></i> Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.forEach.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        // Auto-generate SKU if empty
+        document.getElementById('name').addEventListener('input', function() {
+            var skuField = document.getElementById('sku');
+            if (!skuField.value) {
+                var name = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                if (name.length > 0) {
+                    skuField.value = name.substring(0, 8) + Math.random().toString(36).substring(2, 6).toUpperCase();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
